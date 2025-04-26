@@ -2,7 +2,7 @@
 Interface for AI agents to use your astrophotography setup using N.I.N.A (Beta)
 # NINA Model Context Protocol Server for Advanced API Plugin v2 (MCP)
 
-A powerful interface for controlling N.I.N.A. (Nighttime Imaging 'N' Astronomy) software through its Advanced API [NINA Advanced API](https://bump.sh/christian-photo/doc/advanced-api) . This Model Context Protocol Server (MCP) enables AI agents to interact with NINA using tools, providing new way to interact with your setup. Usage with your own responsibility.
+A powerful interface for controlling N.I.N.A. (Nighttime Imaging 'N' Astronomy) software through its Advanced API [NINA Advanced API](https://github.com/christian-photo/ninaAPI) . This Model Context Protocol Server (MCP) enables AI agents to interact with NINA using tools, providing new way to interact with your setup. Usage with your own responsibility.
 
 <div align="center">
 
