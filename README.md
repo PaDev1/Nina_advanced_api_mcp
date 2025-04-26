@@ -2,7 +2,7 @@
 Inter face for AI agents to use your astrophotography setup using N.I.N.A
 # NINA Model Context Provider (MCP)
 
-A powerful interface for controlling N.I.N.A. (Nighttime Imaging 'N' Astronomy) software through its Advanced API. This Model Context Provider (MCP) enables AI agents to interact with NINA, providing seamless automation and integration for astrophotography.
+A powerful interface for controlling N.I.N.A. (Nighttime Imaging 'N' Astronomy) software through its Advanced API [NINA Advanced API](https://bump.sh/christian-photo/doc/advanced-api) . This Model Context Protocol Server (MCP) enables AI agents to interact with NINA using tools, providing new way to interact with your setup. Usage with your own responsibility.
 
 <div align="center">
 
@@ -14,32 +14,22 @@ A powerful interface for controlling N.I.N.A. (Nighttime Imaging 'N' Astronomy) 
 
 ## 🌟 Features
 
-- **Complete Equipment Control**
-  - Cameras (capture, cooling, settings)
-  - Mounts (slewing, parking, tracking)
-  - Focusers (movement, temperature compensation)
-  - Filter Wheels (filter selection, info)
-  - Domes (rotation, shutter control)
-  - Rotators (movement, sync)
-
-- **Advanced Imaging**
-  - Dynamic exposure timeouts
-  - Platesolving integration
-  - Image streaming and format conversion
-  - Automatic file saving
-  - Image statistics and analysis
-
-- **Smart Error Handling**
-  - Comprehensive error recovery
-  - Detailed logging
-  - Connection management
-  - Hardware state monitoring
+- **Complete Equipment Control for AI agents**
+  - Cameras (capture, cooling, settings, connecting ....)
+  - Mounts (slewing, parking, tracking...)
+  - Focusers (movement, temperature compensation ... )
+  - Filter Wheels (filter selection, info ...)
+  - Domes (rotation, shutter control ...)
+  - Rotators (movement, sync...)
+  - ...
 
 - **AI Integration**
   - Natural language command processing
   - Contextual help system
   - Intelligent error responses
   - Automated decision making
+    
+- **Most of the NINA advanced API v2 api interface endpoints supported
 
 ## 🚀 Quick Start
 
@@ -54,13 +44,13 @@ A powerful interface for controlling N.I.N.A. (Nighttime Imaging 'N' Astronomy) 
 
 1. **Install NINA Advanced API Plugin**
    ```bash
-   # Download and install through NINA's plugin manager
+   # Install the plugins in NINA
    # Enable and configure in NINA settings
    ```
 
 2. **Clone Repository**
    ```bash
-   git clone https://github.com/yourusername/nina-mcp.git
+   git clone https://github.com/PaDev1/nina_advanced_api_mcp.git
    cd nina-mcp
    ```
 
@@ -88,7 +78,7 @@ Add to your AI agent's MCP configuration:
         "fastmcp,fastapi,uvicorn,pydantic,aiohttp,requests,python-dotenv",
         "fastmcp",
         "run",
-        "nina_advanced_mcp.py"
+        "path/nina_advanced_mcp.py"
       ],
       "env": {
         "NINA_HOST": "NINA_IP",
@@ -103,27 +93,11 @@ Add to your AI agent's MCP configuration:
 
 ## 📚 Usage
 
-### Basic Examples
-
-```python
-# Connect to NINA
-result = await nina_connect({"host": "localhost", "port": 1888})
-
-# Capture an Image
-result = await nina_capture_image({
-    "duration": 30,
-    "download": True,
-    "solve": True,
-    "quality": 90,
-    "size": "1920x1080"
-})
-
-# Control Mount
-result = await nina_slew_mount({
-    "ra": 12.5,  # Hours
-    "dec": 45.0  # Degrees
-})
-```
+### Basic AI Examples with Claude Destop
+- Connect to nina
+- read the setup
+- connect my camera, mount, filter wheel and guider
+- read the sequesces and let me select the sequence to start
 
 ### AI Agent Commands
 
@@ -134,26 +108,7 @@ result = await nina_slew_mount({
 - "Get the current equipment status"
 ```
 
-## 🛠 Advanced Features
 
-### Dynamic Timeouts
-- Automatic timeout calculation based on:
-  - Exposure duration
-  - Platesolving requirements
-  - Download settings
-  - Operation type
-
-### Error Recovery
-- Automatic retry mechanisms
-- Hardware state recovery
-- Connection management
-- Comprehensive error reporting
-
-### Image Processing
-- Format conversion
-- Size adjustment
-- Quality control
-- Metadata preservation
 
 ## 📖 API Documentation
 
@@ -205,16 +160,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [NINA](https://nighttime-imaging.eu/) - The core astronomy software
 - [NINA Advanced API](https://bump.sh/christian-photo/doc/advanced-api) - API documentation
-- Community contributors and testers
 
 ## 🔗 Related Projects
 
 - [Touch'N'Stars](https://github.com/Touch-N-Stars/Touch-N-Stars) - WebApp for Mobile Control of NINA
 - [NINA Plugins](https://nighttime-imaging.eu/plugins/) - Official NINA plugin repository
 
-## 📞 Support
-
-Need help? Check out:
-- [Documentation](docs/)
-- [Discussions](../../discussions)
-- [Issues](../../issues)
