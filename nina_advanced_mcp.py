@@ -3,23 +3,12 @@
 NINA Advanced API Server - Provides tools to Claude for controlling N.I.N.A. using the Advanced API
 """
 
-import asyncio
-import logging
 import os
-import sys
-import json
-import time
-from datetime import datetime
 from pathlib import Path
-import base64
-from typing import Dict, Any, Optional, List, Union, Callable, Literal
-from fastmcp import FastMCP
-from pydantic import BaseModel, Field
-from enum import Enum
 from dotenv import load_dotenv
-import aiohttp
-import requests
-from urllib.parse import quote
+
+# Load environment variables first, before any other imports
+load_dotenv()
 
 # Default environment variable names
 ENV_NINA_HOST = 'NINA_HOST'
@@ -27,20 +16,33 @@ ENV_NINA_PORT = 'NINA_PORT'
 ENV_LOG_LEVEL = 'LOG_LEVEL'
 ENV_IMAGE_SAVE_DIR = 'IMAGE_SAVE_DIR'
 
-# Load environment variables from .env file and system environment
-load_dotenv()
-
 # Default values
-DEFAULT_NINA_HOST = 'localhost'  # Updated default to match env config
+DEFAULT_NINA_HOST = 'localhost'
 DEFAULT_NINA_PORT = 1888
 DEFAULT_LOG_LEVEL = 'INFO'
-DEFAULT_IMAGE_SAVE_DIR = os.path.expanduser('~/Desktop/NINA_Images')
+DEFAULT_IMAGE_SAVE_DIR = str(Path('~/Desktop/NINA_Images').expanduser())
 
 # Get values from environment with defaults
 NINA_HOST = os.getenv(ENV_NINA_HOST, DEFAULT_NINA_HOST)
 NINA_PORT = int(os.getenv(ENV_NINA_PORT, DEFAULT_NINA_PORT))
 LOG_LEVEL = os.getenv(ENV_LOG_LEVEL, DEFAULT_LOG_LEVEL).upper()
-IMAGE_SAVE_DIR = os.path.expanduser(os.getenv(ENV_IMAGE_SAVE_DIR, DEFAULT_IMAGE_SAVE_DIR))
+IMAGE_SAVE_DIR = str(Path(os.getenv(ENV_IMAGE_SAVE_DIR, DEFAULT_IMAGE_SAVE_DIR)).expanduser())
+
+# Now import everything else
+import asyncio
+import logging
+import sys
+import json
+import time
+from datetime import datetime
+import base64
+from typing import Dict, Any, Optional, List, Union, Callable, Literal
+from fastmcp import FastMCP
+from pydantic import BaseModel, Field
+from enum import Enum
+import aiohttp
+import requests
+from urllib.parse import quote
 
 # Configure logging
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -357,8 +359,9 @@ class NinaAPIClient:
 
 # Input Models
 class ConnectInput(BaseModel):
-    host: str = DEFAULT_NINA_HOST
-    port: int = DEFAULT_NINA_PORT
+    """Input model for version endpoint"""
+    host: str = Field(default_factory=lambda: os.getenv(ENV_NINA_HOST, DEFAULT_NINA_HOST))
+    port: int = Field(default_factory=lambda: int(os.getenv(ENV_NINA_PORT, DEFAULT_NINA_PORT)))
 
 class FilterWheelConnectInput(BaseModel):
     device_id: Optional[str] = None
@@ -2375,19 +2378,20 @@ async def nina_wait(seconds: float) -> Dict[str, Any]:
 async def nina_connect(input: ConnectInput) -> Dict[str, Any]:
     """Connect to the NINA astronomy software HTTP server. This tool is specifically for NINA control and should not be used for direct hardware connections."""
     try:
-        server_state.host = input.host
-        server_state.port = input.port
+        # Always use environment variables if available
+        server_state.host = os.getenv(ENV_NINA_HOST, input.host)
+        server_state.port = int(os.getenv(ENV_NINA_PORT, input.port))
         
         client = await get_client()
-        client.host = input.host
-        client.port = input.port
+        client.host = server_state.host
+        client.port = server_state.port
         await client.connect()
         
         server_state.mode = ConnectionMode.CONNECTED
         server_state.clear_error()
         return {
             "Success": True,
-            "Message": f"Connected to N.I.N.A. at {input.host}:{input.port}",
+            "Message": f"Connected to N.I.N.A. at {server_state.host}:{server_state.port}",
             "State": server_state.to_dict(),
             "Type": "NINA_API"
         }
