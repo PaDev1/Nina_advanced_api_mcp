@@ -50,7 +50,7 @@ A powerful interface for controlling N.I.N.A. (Nighttime Imaging 'N' Astronomy) 
 
 2. **Clone Repository**
    ```bash
-   git clone https://github.com/PaDev1/nina_advanced_api_mcp.git
+   git clone https://github.com/PaDev1/Nina_advanced_api_mcp.git
    cd nina-mcp
    ```
 
