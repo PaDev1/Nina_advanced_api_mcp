@@ -3075,13 +3075,13 @@ async def nina_get_plugins(input: ApplicationPluginsInput) -> Dict[str, Any]:
 
 @mcp.tool()
 async def nina_get_screenshot(input: ApplicationScreenshotInput) -> Dict[str, Any]:
-    """Get a screenshot of the NINA application.
+    """Get a screenshot of the NINA application and save it to the configured image directory.
     
     Returns:
         Dict containing:
         - Success status
         - Message about the operation
-        - Base64 encoded screenshot image
+        - Saved file path
         - Type of response
     """
     try:
@@ -3093,14 +3093,49 @@ async def nina_get_screenshot(input: ApplicationScreenshotInput) -> Dict[str, An
                 {"StatusCode": 401}
             )
 
+        # Get the screenshot
         result = await client._send_request("GET", "application/screenshot")
-        return {
-            "Success": True,
-            "Message": "Screenshot retrieved successfully",
-            "Screenshot": result.get("Response", {}).get("Image", ""),
-            "Type": "NINA_API"
-        }
+        
+        if not result.get("Success", False):
+            return create_error_response(
+                "NINAApplicationError",
+                result.get("Error", "Unknown error getting screenshot"),
+                {"StatusCode": result.get("StatusCode", 500)}
+            )
+
+        # Ensure the image directory exists
+        os.makedirs(IMAGE_SAVE_DIR, exist_ok=True)
+
+        # Generate filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"nina_screenshot_{timestamp}.jpg"
+        file_path = os.path.join(IMAGE_SAVE_DIR, filename)
+
+        try:
+            # Decode base64 and save the image
+            image_data = base64.b64decode(result["Response"])
+            with open(file_path, 'wb') as f:
+                f.write(image_data)
+            
+            logger.info(f"Screenshot saved to: {file_path}")
+            
+            return {
+                "Success": True,
+                "Message": "Screenshot captured and saved successfully",
+                "SavedPath": file_path,
+                "Filename": filename,
+                "Type": "NINA_API"
+            }
+        except Exception as e:
+            logger.error(f"Failed to save screenshot: {str(e)}")
+            return create_error_response(
+                "NINAApplicationError",
+                f"Failed to save screenshot: {str(e)}",
+                {"StatusCode": 500}
+            )
+            
     except Exception as e:
+        logger.error(f"Error in nina_get_screenshot: {str(e)}")
         return create_error_response("NINAApplicationError", str(e))
 
 class CameraWarmingInput(BaseModel):
@@ -4755,8 +4790,22 @@ async def nina_help(input: HelpInput) -> Dict[str, Any]:
         return create_error_response("NINAHelpError", str(e))
 
 if __name__ == "__main__":
-    logger.info("Starting NINA Advanced API Server...")
-    logger.info(f"Connecting to NINA at {DEFAULT_NINA_HOST}:{DEFAULT_NINA_PORT}")
+    import signal
+    import sys
+
+    def signal_handler(sig, frame):
+        logger.info("Shutdown signal received, stopping server...")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
+    logger.info("Starting NINA MCP Server...")
+    logger.info(f"Using configuration:")
+    logger.info(f"NINA_HOST: {NINA_HOST}")
+    logger.info(f"NINA_PORT: {NINA_PORT}")
+    logger.info(f"LOG_LEVEL: {LOG_LEVEL}")
+    logger.info(f"IMAGE_SAVE_DIR: {IMAGE_SAVE_DIR}")
     
     # Run the FastMCP server
     mcp.run() 
