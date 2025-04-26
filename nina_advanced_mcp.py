@@ -31,7 +31,7 @@ ENV_IMAGE_SAVE_DIR = 'IMAGE_SAVE_DIR'
 load_dotenv()
 
 # Default values
-DEFAULT_NINA_HOST = '100.112.172.57'  # Updated default to match env config
+DEFAULT_NINA_HOST = 'localhost'  # Updated default to match env config
 DEFAULT_NINA_PORT = 1888
 DEFAULT_LOG_LEVEL = 'INFO'
 DEFAULT_IMAGE_SAVE_DIR = os.path.expanduser('~/Desktop/NINA_Images')
