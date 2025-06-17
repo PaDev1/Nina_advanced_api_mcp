@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/padev1-nina-advanced-api-mcp-badge.png)](https://mseep.ai/app/padev1-nina-advanced-api-mcp)
+
 # Nina_advanced_api_mcp
 Interface for AI agents to use your astrophotography setup using N.I.N.A (Beta)
 # N.I.N.A Model Context Protocol Server for Advanced API Plugin v2 (MCP)
