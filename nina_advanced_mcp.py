@@ -2505,7 +2505,7 @@ async def nina_get_status() -> Dict[str, Any]:
             "filterwheel": "equipment/filterwheel/info",
             "guider": "equipment/guider/info",
             "dome": "equipment/dome/info",
-            "flatpanel": "equipment/flat-panel/info",
+            "flatpanel": "equipment/flatdevice/info",
             "safetymonitor": "equipment/safetymonitor/info",
             "weather": "equipment/weather/info",
             "switch": "equipment/switch/info"
@@ -3238,7 +3238,7 @@ async def nina_connect_flatpanel(input: FlatPanelConnectInput) -> Dict[str, Any]
                 {"StatusCode": 401}
             )
 
-        endpoint = "equipment/flat-panel/connect"
+        endpoint = "equipment/flatdevice/connect"
         if input.device_id:
             endpoint += f"?to={input.device_id}"
 
@@ -3271,7 +3271,7 @@ async def nina_disconnect_flatpanel() -> Dict[str, Any]:
                 {"StatusCode": 401}
             )
 
-        result = await client._send_request("GET", "equipment/flat-panel/disconnect")
+        result = await client._send_request("GET", "equipment/flatdevice/disconnect")
         return {
             "Success": True,
             "Message": "Flat panel disconnected successfully",
@@ -3301,7 +3301,7 @@ async def nina_list_flatpanel_devices() -> Dict[str, Any]:
                 {"StatusCode": 401}
             )
 
-        result = await client._send_request("GET", "equipment/flat-panel/list-devices")
+        result = await client._send_request("GET", "equipment/flatdevice/list-devices")
         return {
             "Success": True,
             "Message": "Flat panel devices listed successfully",
@@ -3331,7 +3331,7 @@ async def nina_rescan_flatpanel_devices() -> Dict[str, Any]:
                 {"StatusCode": 401}
             )
 
-        result = await client._send_request("GET", "equipment/flat-panel/rescan")
+        result = await client._send_request("GET", "equipment/flatdevice/rescan")
         return {
             "Success": True,
             "Message": "Flat panel devices rescanned successfully",
@@ -3361,7 +3361,7 @@ async def nina_get_flatpanel_info() -> Dict[str, Any]:
                 {"StatusCode": 401}
             )
 
-        result = await client._send_request("GET", "equipment/flat-panel/info")
+        result = await client._send_request("GET", "equipment/flatdevice/info")
         return {
             "Success": True,
             "Message": "Flat panel information retrieved successfully",
@@ -3394,7 +3394,7 @@ async def nina_set_flatpanel_light(input: FlatPanelLightInput) -> Dict[str, Any]
                 {"StatusCode": 401}
             )
 
-        result = await client._send_request("GET", f"equipment/flat-panel/set-light?power={str(input.power).lower()}")
+        result = await client._send_request("GET", f"equipment/flatdevice/set-light?power={str(input.power).lower()}")
         return {
             "Success": True,
             "Message": f"Flat panel light {'enabled' if input.power else 'disabled'} successfully",
@@ -3427,7 +3427,7 @@ async def nina_set_flatpanel_cover(input: FlatPanelCoverInput) -> Dict[str, Any]
                 {"StatusCode": 401}
             )
 
-        result = await client._send_request("GET", f"equipment/flat-panel/set-cover?closed={str(input.closed).lower()}")
+        result = await client._send_request("GET", f"equipment/flatdevice/set-cover?closed={str(input.closed).lower()}")
         return {
             "Success": True,
             "Message": f"Flat panel cover {'closed' if input.closed else 'opened'} successfully",
@@ -3460,7 +3460,7 @@ async def nina_set_flatpanel_brightness(input: FlatPanelBrightnessInput) -> Dict
                 {"StatusCode": 401}
             )
 
-        result = await client._send_request("GET", f"equipment/flat-panel/set-brightness?brightness={input.brightness}")
+        result = await client._send_request("GET", f"equipment/flatdevice/set-brightness?brightness={input.brightness}")
         return {
             "Success": True,
             "Message": f"Flat panel brightness set to {input.brightness} successfully",
