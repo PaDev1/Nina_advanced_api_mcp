@@ -57,7 +57,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler(log_file),
-        logging.StreamHandler()
+        logging.StreamHandler(sys.stderr)
     ]
 )
 logger = logging.getLogger('NinaAdvancedAPI')
