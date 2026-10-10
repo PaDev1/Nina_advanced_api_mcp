@@ -1816,7 +1816,7 @@ async def nina_stop_slew() -> Dict[str, Any]:
             )
 
         # Stop the slew
-        result = await client._send_request("GET", "equipment/mount/stop-slew")
+        result = await client._send_request("GET", "equipment/mount/slew/stop")
         
         return {
             "Success": True,
