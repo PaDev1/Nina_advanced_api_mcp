@@ -148,7 +148,7 @@ def create_error_response(error_type: str, message: str, details: Optional[Dict]
 # Initialize FastMCP
 mcp = FastMCP(
     name="NINA Advanced API",
-    description="Model Context Provider for N.I.N.A. astrophotography software using Advanced API",
+    instructions="Model Context Provider for N.I.N.A. astrophotography software using Advanced API",
     version="0.1.0"
 )
 
