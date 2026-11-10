@@ -193,15 +193,23 @@ class NinaAPIClient:
             self.session = None
         self._connected = False
 
-    async def _send_request(self, method: str, endpoint: str, data: Optional[Dict] = None, handle_image_stream: bool = False) -> Dict[str, Any]:
-        """Send a request to the NINA API"""
+    async def _send_request(self, method: str, endpoint: str, data: Optional[Dict] = None, handle_image_stream: bool = False, timeout: Optional[float] = None) -> Dict[str, Any]:
+        """Send a request to the NINA API
+
+        timeout: optional total timeout in seconds for this request only,
+        overriding the session default (for long operations such as
+        plate solving).
+        """
         if not self.session:
             raise ConnectionError("HTTP connection not established")
 
         url = f"http://{self.host}:{self.port}/v2/api/{endpoint}"
+        request_kwargs = {"json": data}
+        if timeout is not None:
+            request_kwargs["timeout"] = aiohttp.ClientTimeout(total=timeout)
         try:
             logger.debug(f"Sending {method} request to {url}")
-            async with self.session.request(method, url, json=data) as response:
+            async with self.session.request(method, url, **request_kwargs) as response:
                 # Check if this is an image stream response
                 content_type = response.headers.get('Content-Type', '')
                 if handle_image_stream and 'image/' in content_type:
@@ -459,6 +467,13 @@ class MountSlewInput(BaseModel):
 class MountParkPositionInput(BaseModel):
     ra: float
     dec: float
+
+class MountSyncInput(BaseModel):
+    """Input model for mount sync. Give both ra and dec to sync to those
+    coordinates, or neither to plate solve the current position and sync."""
+    ra: Optional[float] = None  # Right Ascension in hours (J2000, converted to degrees)
+    dec: Optional[float] = None  # Declination in degrees (J2000)
+    timeout_seconds: Optional[float] = 180  # Request timeout when plate solving
 
 # Dome Input Models
 class DomeConnectInput(BaseModel):
@@ -1862,6 +1877,85 @@ async def nina_set_park_position(input: MountParkPositionInput) -> Dict[str, Any
             "Type": "NINA_API"
         }
 
+    except Exception as e:
+        return create_error_response("NINAMountError", str(e))
+
+@mcp.tool()
+async def nina_sync_mount(input: MountSyncInput) -> Dict[str, Any]:
+    """Sync the mount's position in NINA astronomy software.
+
+    Two modes:
+    - Coordinates given (ra and dec): tell the mount it is pointing at those
+      J2000 coordinates.
+    - No coordinates: NINA takes an exposure, plate solves it and syncs the
+      mount to the solved position (uses the plate solve settings of the
+      active NINA profile; needs the camera connected).
+
+    Args:
+        input: MountSyncInput containing:
+            ra: Right Ascension in hours (0-24), optional
+            dec: Declination in degrees (-90 to +90), optional
+            timeout_seconds: Request timeout for the plate solve mode (default 180)
+
+    Returns:
+        Dict containing:
+        - Success status
+        - Message about the operation
+        - Type of response
+    """
+    try:
+        client = await get_client()
+        if not client._connected:
+            return create_error_response(
+                "NINAMountError",
+                "Not connected to NINA server. Please connect first using nina_connect.",
+                {"StatusCode": 401}
+            )
+
+        if (input.ra is None) != (input.dec is None):
+            return create_error_response(
+                "NINAMountError",
+                "Give both ra and dec to sync to coordinates, or neither to plate solve and sync",
+                {"StatusCode": 400}
+            )
+
+        if input.ra is not None:
+            if not 0 <= input.ra <= 24:
+                return create_error_response(
+                    "NINAMountError",
+                    "Right Ascension must be between 0 and 24 hours",
+                    {"StatusCode": 400}
+                )
+            if not -90 <= input.dec <= 90:
+                return create_error_response(
+                    "NINAMountError",
+                    "Declination must be between -90 and +90 degrees",
+                    {"StatusCode": 400}
+                )
+
+            # The API expects RA in degrees (1 hour = 15 degrees)
+            ra_degrees = input.ra * 15.0
+            result = await client._send_request("GET", f"equipment/mount/sync?ra={ra_degrees}&dec={input.dec}")
+            message = f"Mount synced to RA={input.ra}h, Dec={input.dec}°"
+        else:
+            # Plate solve and sync: exposure + solve can take far longer than
+            # the default request timeout
+            result = await client._send_request("GET", "equipment/mount/sync", timeout=input.timeout_seconds)
+            message = "Mount synced to the plate-solved position"
+
+        return {
+            "Success": True,
+            "Message": message,
+            "Details": result,
+            "Type": "NINA_API"
+        }
+
+    except asyncio.TimeoutError:
+        return create_error_response(
+            "NINAMountError",
+            f"Sync did not finish within {input.timeout_seconds} s. NINA may still be solving; check NINA before retrying.",
+            {"StatusCode": 504}
+        )
     except Exception as e:
         return create_error_response("NINAMountError", str(e))
 
